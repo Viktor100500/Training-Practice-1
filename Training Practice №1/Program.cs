@@ -61,6 +61,7 @@ namespace Training_Practice__1
         {
             List<List<int>> AdjacencyMatrix = new List<List<int>>();
             AdjacencyMatrix = CreateGrafSequences(NumberOfParticles, ReactionMatrix);
+            WriteAnswer(AdjacencyMatrix);
         }
 
         static List<List<int>> CreateGrafSequences(int[] NumberOfParticles, int[,] ReactionMatrix) // Создание матрицы смежности для графа описывающего всевозможные варианты 
@@ -92,29 +93,68 @@ namespace Training_Practice__1
                 {
                     if (ReactionMatrix[i, j] == 1) // Если частицы реагируют между собой
                     {
-                        if (i != j) // Если эти частицы разного вида 
+                        if (ReactionMatrix[j, i] == 1 && i != j)
                         {
                             if (GetNumeral(Vert, i) != 1 && GetNumeral(Vert, j) != 1) // Проверка на существование каждой частицы
-                            {
-                                int NewVert = Vert - Numeral(VertCount, j); // Вычитаем убийцу}
-                                if (Check(AdjacencyMatrix, NewVert)) // Проверяем была ли такая вершина в графе
-                                {
-                                    AdjacencyMatrix[0].Add(NewVert); // Если нет - добавляем
-                                    AddUnits(ref AdjacencyMatrix, Vert);
-                                    AdjacencyMatrix = Vertex(NewVert, AdjacencyMatrix, ReactionMatrix); // Создаем новую вершину и идем дальше с помощью рекурсии
-                                }
-                            }
-                        }
-                        else // если частицы одинакового вида, то 
-                        {
-                            if (GetNumeral(Vert, i) == 3) // Нужно минимум две для реакции(поправка на единицу)
                             {
                                 int NewVert = Vert - Numeral(VertCount, j); // Вычитаем убийцу
                                 if (Check(AdjacencyMatrix, NewVert)) // Проверяем была ли такая вершина в графе
                                 {
-                                    AdjacencyMatrix[0].Add(NewVert); // Если нет - добавляем
-                                    AddUnits(ref AdjacencyMatrix, Vert);
+                                    AdjacencyMatrix[0].Add(NewVert); // Если нет - добавляем    
+                                    AddUnits(ref AdjacencyMatrix, Vert, NewVert);
                                     AdjacencyMatrix = Vertex(NewVert, AdjacencyMatrix, ReactionMatrix); // Создаем новую вершину и идем дальше с помощью рекурсии
+                                }
+                                else
+                                {
+                                    AddUnits(ref AdjacencyMatrix, Vert, NewVert);
+                                }
+                                NewVert = Vert - Numeral(VertCount, i); // Вычитаем убийцу
+                                if (Check(AdjacencyMatrix, NewVert)) // Проверяем была ли такая вершина в графе
+                                {
+                                    AdjacencyMatrix[0].Add(NewVert); // Если нет - добавляем    
+                                    AddUnits(ref AdjacencyMatrix, Vert, NewVert);
+                                    AdjacencyMatrix = Vertex(NewVert, AdjacencyMatrix, ReactionMatrix); // Создаем новую вершину и идем дальше с помощью рекурсии
+                                }
+                                else
+                                {
+                                    AddUnits(ref AdjacencyMatrix, Vert, NewVert);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (i != j) // Если эти частицы разного вида 
+                            {
+                                if (GetNumeral(Vert, i) != 1 && GetNumeral(Vert, j) != 1) // Проверка на существование каждой частицы
+                                {
+                                    int NewVert = Vert - Numeral(VertCount, j); // Вычитаем убийцу
+                                    if (Check(AdjacencyMatrix, NewVert)) // Проверяем была ли такая вершина в графе
+                                    {
+                                        AdjacencyMatrix[0].Add(NewVert); // Если нет - добавляем    
+                                        AddUnits(ref AdjacencyMatrix, Vert, NewVert);
+                                        AdjacencyMatrix = Vertex(NewVert, AdjacencyMatrix, ReactionMatrix); // Создаем новую вершину и идем дальше с помощью рекурсии
+                                    }
+                                    else
+                                    {
+                                        AddUnits(ref AdjacencyMatrix, Vert, NewVert);
+                                    }
+                                }
+                            }
+                            else // если частицы одинакового вида, то 
+                            {
+                                if (GetNumeral(Vert, i) == 3) // Нужно минимум две для реакции(поправка на единицу)
+                                {
+                                    int NewVert = Vert - Numeral(VertCount, j); // Вычитаем убийцу
+                                    if (Check(AdjacencyMatrix, NewVert)) // Проверяем была ли такая вершина в графе
+                                    {
+                                        AdjacencyMatrix[0].Add(NewVert); // Если нет - добавляем    
+                                        AddUnits(ref AdjacencyMatrix, Vert, NewVert);
+                                        AdjacencyMatrix = Vertex(NewVert, AdjacencyMatrix, ReactionMatrix); // Создаем новую вершину и идем дальше с помощью рекурсии
+                                    }
+                                    else
+                                    {
+                                        AddUnits(ref AdjacencyMatrix, Vert, NewVert);
+                                    }
                                 }
                             }
                         }
@@ -145,11 +185,24 @@ namespace Training_Practice__1
             }
         }
 
-        static void AddUnits(ref List<List<int>> AdjacencyMatrix, int OldVert) // Добаление недостающих нулей 
+        static void AddUnits(ref List<List<int>> AdjacencyMatrix, int OldVert, int NewVert) // Добаление недостающих нулей 
         {
-            for (int i = 1; i < AdjacencyMatrix.Count; i++)
+            for(int i = 1; i < AdjacencyMatrix.Count; i++)
             {
-                if (OldVert == AdjacencyMatrix[i][0]) { AdjacencyMatrix[i].Add(1); }
+                for(int j = 1; j <AdjacencyMatrix[0].Count; j++)
+                {
+                    if(AdjacencyMatrix[0][j] == NewVert && AdjacencyMatrix[i][0] == OldVert)
+                    {
+                        try
+                        {
+                            AdjacencyMatrix[i][j] = 1;
+                        }
+                        catch
+                        {
+                            AdjacencyMatrix[i].Add(1);
+                        }
+                    }
+                }
             }
         }
 
@@ -160,6 +213,50 @@ namespace Training_Practice__1
                 if (AdMatrix[0][i] == NewVert) return false;
             }
             return true;
+        }
+
+        static void WriteAnswer(List<List<int>> AdjacencyMatrix)
+        {
+            // Выборка ответов из матрицы смежности 
+            bool EndTop;
+            List<int> ListParticles = new List<int>();
+            for (int i = 1; i < AdjacencyMatrix.Count; i++)
+            {
+                EndTop = true;
+                for(int j = 1; j < AdjacencyMatrix.Count; j++)
+                {
+                    if(AdjacencyMatrix[i][j] == 1) { EndTop = false; }
+                }
+                if (EndTop) { ListParticles.Add(AdjacencyMatrix[i][0]); }
+            }
+
+            // Запись в файл
+            FileStream CurrFile = new FileStream("OTPUT.TXT", FileMode.Create); // Открываем файл
+            StreamWriter Writer = new StreamWriter(CurrFile);
+
+            
+
+            Writer.WriteLine(ListParticles.Count);
+            for(int i = 0; i < ListParticles.Count; i++)
+            {
+                Writer.WriteLine(Convert(ListParticles[i]));
+            }
+
+            Writer.Close();
+            CurrFile.Close();
+        }
+
+        static string Convert(int This)
+        {
+            int Dlina = This.ToString().Length;
+            string Itog = "";
+            for(int i = 0; i < Dlina; i++)
+            {
+                if(This.ToString()[i] == '1') Itog += "0";
+                if (This.ToString()[i] == '2') Itog += "1";
+                if (This.ToString()[i] == '3') Itog += "2";
+            }
+            return Itog;
         }
     }
 }
